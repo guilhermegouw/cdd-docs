@@ -1,0 +1,75 @@
+{
+  "description": "Evaluation cases for agent-module.md",
+  "cases": [
+    {
+      "id": "agent-01",
+      "question": "What callbacks are available when streaming responses from the agent?",
+      "expected_keywords": ["OnTextDelta", "OnToolCall", "OnToolResult", "OnComplete", "OnError"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can find the StreamCallbacks section"
+    },
+    {
+      "id": "agent-02",
+      "question": "How do I cancel an ongoing request in the agent?",
+      "expected_keywords": ["Cancel", "sessionID", "context", "cancel"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can find cancellation methods"
+    },
+    {
+      "id": "agent-03",
+      "question": "What are the different message roles in the agent module?",
+      "expected_keywords": ["RoleUser", "RoleAssistant", "RoleSystem", "RoleTool", "user", "assistant"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can find the Role enum"
+    },
+    {
+      "id": "agent-04",
+      "question": "How does session management work in the agent?",
+      "expected_keywords": ["Session", "SessionStore", "messages", "Create", "Current"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can explain session management"
+    },
+    {
+      "id": "agent-05",
+      "question": "What is the purpose of the Agent interface?",
+      "expected_keywords": ["Send", "interface", "SetSystemPrompt", "SetTools", "History"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can describe the Agent interface"
+    },
+    {
+      "id": "agent-06",
+      "question": "How are tool results handled by the agent?",
+      "expected_keywords": ["ToolResult", "ToolCallID", "Content", "IsError", "OnToolResult"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can explain tool result handling"
+    },
+    {
+      "id": "agent-07",
+      "question": "What is the default system prompt used by the agent?",
+      "expected_keywords": ["CDD", "Context-Driven Development", "coding assistant", "tools"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can find the system prompt content"
+    },
+    {
+      "id": "agent-08",
+      "question": "How do I check if a session is busy processing a request?",
+      "expected_keywords": ["IsBusy", "sessionID", "bool", "activeRequests"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can find the IsBusy method"
+    },
+    {
+      "id": "agent-09",
+      "question": "What methods does SessionStore provide?",
+      "expected_keywords": ["Create", "Get", "Current", "List", "Delete", "AddMessage"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can list SessionStore methods"
+    },
+    {
+      "id": "agent-10",
+      "question": "Why does the agent use two blocks for the system prompt?",
+      "expected_keywords": ["OAuth", "Anthropic", "header", "first block"],
+      "expected_sources": ["features/agent-module.md"],
+      "description": "Tests if RAG can explain the OAuth system prompt requirement"
+    }
+  ]
+}
