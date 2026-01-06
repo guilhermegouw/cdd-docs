@@ -684,6 +684,5 @@ agent := agent.New(agent.Config{
 
 ## Related Documentation
 
-- [Provider System](./provider-system.md) - How models are built and configured
-- [TUI Wizard](./tui-wizard.md) - Chat page that uses the agent
 - [Config Module](./config-module.md) - Configuration that drives agent setup
+- [TUI Wizard](./tui-wizard.md) - First-run setup wizard
