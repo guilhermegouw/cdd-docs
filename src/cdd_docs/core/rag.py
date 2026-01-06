@@ -66,8 +66,6 @@ class RAGPipeline:
         self.embedder = embedder
         self.vector_store = vector_store
         self.settings = settings
-
-        # Create Anthropic client with custom base URL for compatible providers
         self.client = anthropic.Anthropic(
             api_key=settings.llm_api_key,
             base_url=settings.llm_base_url,
@@ -85,17 +83,12 @@ class RAGPipeline:
             List of Source objects.
         """
         top_k = top_k or self.settings.top_k
-
-        # Embed the query
         query_embedding = self.embedder.embed(query)
-
-        # Search the vector store
         results = self.vector_store.search(
             query_embedding=query_embedding,
             n_results=top_k,
         )
 
-        # Convert to Source objects
         sources = []
         documents = results.get("documents", [[]])[0]
         metadatas = results.get("metadatas", [[]])[0]
@@ -107,7 +100,7 @@ class RAGPipeline:
                     file_path=meta.get("file_path", "unknown"),
                     section=meta.get("section", "unknown"),
                     text=doc,
-                    score=1 - dist,  # Convert distance to similarity score
+                    score=1 - dist,
                 )
             )
 
@@ -123,7 +116,6 @@ class RAGPipeline:
         Returns:
             An Answer object with the response and sources.
         """
-        # Retrieve relevant documents
         sources = self.search(question, top_k)
 
         if not sources:
@@ -132,15 +124,12 @@ class RAGPipeline:
                 sources=[],
             )
 
-        # Build context from sources
         context_parts = []
         for i, source in enumerate(sources, 1):
             context_parts.append(
                 f"[Source {i}: {source.file_path} - {source.section}]\n{source.text}"
             )
         context = "\n\n---\n\n".join(context_parts)
-
-        # Generate answer using Claude
         message = self.client.messages.create(
             model=self.settings.llm_model,
             max_tokens=self.settings.llm_max_tokens,
@@ -154,12 +143,11 @@ class RAGPipeline:
             ],
         )
 
-        # Extract text from all text blocks (skip thinking blocks, etc.)
         answer_parts = []
         for block in message.content:
-            if hasattr(block, "text"):
+            if hasattr(block, "text") and block.text is not None:
                 answer_parts.append(block.text)
-        answer_text = "\n".join(answer_parts)
+        answer_text = "\n".join(answer_parts) if answer_parts else "No response generated."
 
         return Answer(text=answer_text, sources=sources)
 
@@ -173,17 +161,13 @@ class RAGPipeline:
         Yields:
             Tuples of (chunk_type, content) where chunk_type is 'sources' or 'text'.
         """
-        # Retrieve relevant documents
         sources = self.search(question, top_k)
-
-        # Yield sources first
         yield ("sources", sources)
 
         if not sources:
             yield ("text", "I couldn't find any relevant documentation to answer your question.")
             return
 
-        # Build context from sources
         context_parts = []
         for i, source in enumerate(sources, 1):
             context_parts.append(
@@ -191,7 +175,6 @@ class RAGPipeline:
             )
         context = "\n\n---\n\n".join(context_parts)
 
-        # Stream answer using Claude
         with self.client.messages.stream(
             model=self.settings.llm_model,
             max_tokens=self.settings.llm_max_tokens,

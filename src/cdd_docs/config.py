@@ -32,9 +32,9 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1  # Low temperature for factual, grounded responses
 
     # RAG
-    chunk_size: int = 500  # words
-    chunk_overlap: int = 50  # words
-    top_k: int = 5  # number of chunks to retrieve
+    chunk_size: int = 200  # words (smaller = better precision)
+    chunk_overlap: int = 30  # words
+    top_k: int = 7  # number of chunks to retrieve
 
     # Collection
     collection_name: str = "cdd_docs"

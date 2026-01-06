@@ -1,0 +1,75 @@
+{
+  "description": "Evaluation cases for config-module.md",
+  "cases": [
+    {
+      "id": "config-01",
+      "question": "Where does CDD store its configuration?",
+      "expected_keywords": ["~/.config/cdd", "cdd.json", "XDG", "global"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can find configuration file locations"
+    },
+    {
+      "id": "config-02",
+      "question": "How do I configure a custom provider like Ollama?",
+      "expected_keywords": ["template", "ollama", "providers add-template", "custom"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain custom provider setup"
+    },
+    {
+      "id": "config-03",
+      "question": "What authentication methods does CDD support?",
+      "expected_keywords": ["API key", "OAuth", "token", "authentication"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can list authentication methods"
+    },
+    {
+      "id": "config-04",
+      "question": "How does first-run detection work?",
+      "expected_keywords": ["IsFirstRun", "config file", "connections", "wizard"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain first-run detection logic"
+    },
+    {
+      "id": "config-05",
+      "question": "What is the difference between large and small models in CDD?",
+      "expected_keywords": ["large", "small", "tier", "reasoning", "quick"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain the two-tier model system"
+    },
+    {
+      "id": "config-06",
+      "question": "How do I use environment variables in CDD configuration?",
+      "expected_keywords": ["$VAR", "${VAR}", "environment", "resolve"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain environment variable resolution"
+    },
+    {
+      "id": "config-07",
+      "question": "What is the difference between project and global configuration?",
+      "expected_keywords": ["project", "global", ".cdd.json", "precedence", "override"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain config precedence"
+    },
+    {
+      "id": "config-08",
+      "question": "What provider templates are available in CDD?",
+      "expected_keywords": ["ollama", "lmstudio", "openrouter", "template"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can list available templates"
+    },
+    {
+      "id": "config-09",
+      "question": "How does OAuth token refresh work in CDD?",
+      "expected_keywords": ["refresh", "token", "expires", "persist", "rotation"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can explain OAuth token refresh"
+    },
+    {
+      "id": "config-10",
+      "question": "What CLI commands are available for provider management?",
+      "expected_keywords": ["providers list", "providers add", "providers remove", "cdd providers"],
+      "expected_sources": ["features/config-module.md"],
+      "description": "Tests if RAG can list provider CLI commands"
+    }
+  ]
+}
