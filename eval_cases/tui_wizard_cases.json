@@ -1,0 +1,75 @@
+{
+  "description": "Evaluation cases for tui-wizard.md",
+  "cases": [
+    {
+      "id": "wizard-01",
+      "question": "What happens when I run cdd for the first time?",
+      "expected_keywords": ["wizard", "first run", "setup", "configuration"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain first-run behavior"
+    },
+    {
+      "id": "wizard-02",
+      "question": "What are the steps in the CDD setup wizard?",
+      "expected_keywords": ["provider", "authentication", "model", "steps"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can list wizard steps"
+    },
+    {
+      "id": "wizard-03",
+      "question": "How do I authenticate with OAuth in CDD?",
+      "expected_keywords": ["OAuth", "browser", "code", "PKCE", "token"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain OAuth flow"
+    },
+    {
+      "id": "wizard-04",
+      "question": "How do I use an environment variable for my API key?",
+      "expected_keywords": ["$", "environment", "variable", "API key"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain env var usage in wizard"
+    },
+    {
+      "id": "wizard-05",
+      "question": "What is the difference between large and small models in the wizard?",
+      "expected_keywords": ["large", "small", "complex", "fast", "tier"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain model tiers"
+    },
+    {
+      "id": "wizard-06",
+      "question": "How do I add a custom provider like Ollama in the wizard?",
+      "expected_keywords": ["custom", "provider", "Ollama", "local", "define"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain custom provider setup"
+    },
+    {
+      "id": "wizard-07",
+      "question": "What keyboard shortcuts work in the CDD wizard?",
+      "expected_keywords": ["arrow", "Enter", "Escape", "Tab", "navigation"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can list keyboard shortcuts"
+    },
+    {
+      "id": "wizard-08",
+      "question": "Where does the wizard save the configuration?",
+      "expected_keywords": ["save", "config", "~/.config/cdd", "file"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain config save location"
+    },
+    {
+      "id": "wizard-09",
+      "question": "What authentication options are available for Anthropic?",
+      "expected_keywords": ["OAuth", "API Key", "Anthropic", "authentication"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can list Anthropic auth options"
+    },
+    {
+      "id": "wizard-10",
+      "question": "How does PKCE work in the OAuth flow?",
+      "expected_keywords": ["PKCE", "verifier", "challenge", "security", "code"],
+      "expected_sources": ["features/tui-wizard.md"],
+      "description": "Tests if RAG can explain PKCE security"
+    }
+  ]
+}
