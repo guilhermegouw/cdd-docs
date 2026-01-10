@@ -31,10 +31,16 @@ class Settings(BaseSettings):
     llm_timeout: float = 300.0  # seconds
     llm_temperature: float = 0.1  # Low temperature for factual, grounded responses
 
-    # RAG
-    chunk_size: int = 200  # words (smaller = better precision)
-    chunk_overlap: int = 30  # words
+    # RAG (header-based chunking)
+    min_chunk_size: int = 100  # words - sections smaller than this are skipped
+    max_section_size: int = 1000  # words - warn if section exceeds this
     top_k: int = 7  # number of chunks to retrieve
+
+    # Conversation History & Query Rewriting
+    max_history_turns: int = 10  # number of conversation turns to keep
+    enable_query_rewriting: bool = True  # rewrite queries using conversation context
+    rewriter_max_tokens: int = 150  # max tokens for query rewriting
+    rewriter_temperature: float = 0.3  # temperature for query rewriting
 
     # Collection
     collection_name: str = "cdd_docs"

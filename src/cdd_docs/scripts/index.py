@@ -66,8 +66,8 @@ def main():
         vector_store.reset()
 
     chunker = MarkdownChunker(
-        chunk_size=settings.chunk_size,
-        chunk_overlap=settings.chunk_overlap,
+        min_chunk_size=settings.min_chunk_size,
+        max_section_size=settings.max_section_size,
     )
 
     # Find all markdown files

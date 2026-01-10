@@ -1,6 +1,7 @@
 """RAG pipeline for document Q&A."""
 
 from dataclasses import dataclass
+from typing import Literal, TypedDict
 
 import anthropic
 import httpx
@@ -28,6 +29,13 @@ class Answer:
     sources: list[Source]
 
 
+class ChatMessage(TypedDict):
+    """A message in the conversation history."""
+
+    role: Literal["user", "assistant"]
+    content: str
+
+
 SYSTEM_PROMPT = """You are a documentation assistant for CDD (Context-Driven Development),
 an AI-powered coding assistant CLI.
 
@@ -45,6 +53,16 @@ If you cannot answer the question from the provided context, respond with:
 "I couldn't find information about that in the documentation. You might want to check
 [suggest where to look or ask to rephrase]."
 """
+
+REWRITER_PROMPT = """You are a query rewriting assistant for a documentation search system.
+
+Given the conversation history and current query, rewrite the query to be
+self-contained and specific.
+- Replace pronouns ("it", "this", "that") with their referents from context
+- Include relevant context that makes the query searchable
+- Keep it concise - this will be used for semantic search
+
+Respond with ONLY the rewritten query, nothing else."""
 
 
 class RAGPipeline:
@@ -106,17 +124,67 @@ class RAGPipeline:
 
         return sources
 
-    def ask(self, question: str, top_k: int | None = None) -> Answer:
+    def rewrite_query(self, query: str, history: list[ChatMessage]) -> str:
+        """Rewrite a query using conversation history for context.
+
+        Args:
+            query: The current user query.
+            history: Previous conversation turns.
+
+        Returns:
+            A self-contained, rewritten query.
+        """
+        if not history or not self.settings.enable_query_rewriting:
+            return query
+
+        # Build conversation context for the rewriter
+        max_messages = self.settings.max_history_turns * 2
+        messages: list[dict[str, str]] = []
+        for msg in history[-max_messages:]:
+            messages.append({"role": msg["role"], "content": msg["content"]})
+
+        # Add the rewriting request
+        messages.append({
+            "role": "user",
+            "content": f"Current query to rewrite: {query}",
+        })
+
+        response = self.client.messages.create(
+            model=self.settings.llm_model,
+            max_tokens=self.settings.rewriter_max_tokens,
+            temperature=self.settings.rewriter_temperature,
+            system=REWRITER_PROMPT,
+            messages=messages,
+        )
+
+        # Extract text from response (skip thinking blocks)
+        for block in response.content:
+            if hasattr(block, "text") and block.text:
+                return block.text.strip()
+
+        return query
+
+    def ask(
+        self,
+        question: str,
+        top_k: int | None = None,
+        history: list[ChatMessage] | None = None,
+    ) -> Answer:
         """Ask a question and get an answer with sources.
 
         Args:
             question: The question to answer.
             top_k: Number of source documents to retrieve.
+            history: Optional conversation history for context.
 
         Returns:
             An Answer object with the response and sources.
         """
-        sources = self.search(question, top_k)
+        # Rewrite query if history exists
+        search_query = self.rewrite_query(question, history or [])
+
+        # Search using rewritten query
+        sources = self.search(search_query, top_k)
 
         if not sources:
             return Answer(
@@ -124,50 +192,70 @@ class RAGPipeline:
                 sources=[],
             )
 
+        # Build context from sources
         context_parts = []
         for i, source in enumerate(sources, 1):
             context_parts.append(
                 f"[Source {i}: {source.file_path} - {source.section}]\n{source.text}"
             )
         context = "\n\n---\n\n".join(context_parts)
-        message = self.client.messages.create(
+
+        # Build messages with history
+        messages: list[dict[str, str]] = []
+        if history:
+            max_messages = self.settings.max_history_turns * 2
+            for msg in history[-max_messages:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+        # Add current question with context
+        messages.append({
+            "role": "user",
+            "content": f"Context:\n{context}\n\n---\n\nQuestion: {question}",
+        })
+
+        response = self.client.messages.create(
             model=self.settings.llm_model,
             max_tokens=self.settings.llm_max_tokens,
             temperature=self.settings.llm_temperature,
             system=SYSTEM_PROMPT,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Context:\n{context}\n\n---\n\nQuestion: {question}",
-                }
-            ],
+            messages=messages,
         )
 
         answer_parts = []
-        for block in message.content:
+        for block in response.content:
             if hasattr(block, "text") and block.text is not None:
                 answer_parts.append(block.text)
         answer_text = "\n".join(answer_parts) if answer_parts else "No response generated."
 
         return Answer(text=answer_text, sources=sources)
 
-    async def ask_stream(self, question: str, top_k: int | None = None):
+    async def ask_stream(
+        self,
+        question: str,
+        top_k: int | None = None,
+        history: list[ChatMessage] | None = None,
+    ):
         """Ask a question and stream the answer.
 
         Args:
             question: The question to answer.
             top_k: Number of source documents to retrieve.
+            history: Optional conversation history for context.
 
         Yields:
             Tuples of (chunk_type, content) where chunk_type is 'sources' or 'text'.
         """
-        sources = self.search(question, top_k)
+        # Rewrite query if history exists
+        search_query = self.rewrite_query(question, history or [])
+
+        sources = self.search(search_query, top_k)
         yield ("sources", sources)
 
         if not sources:
             yield ("text", "I couldn't find any relevant documentation to answer your question.")
             return
 
+        # Build context from sources
         context_parts = []
         for i, source in enumerate(sources, 1):
             context_parts.append(
@@ -175,17 +263,25 @@ class RAGPipeline:
             )
         context = "\n\n---\n\n".join(context_parts)
 
+        # Build messages with history
+        messages: list[dict[str, str]] = []
+        if history:
+            max_messages = self.settings.max_history_turns * 2
+            for msg in history[-max_messages:]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+        # Add current question with context
+        messages.append({
+            "role": "user",
+            "content": f"Context:\n{context}\n\n---\n\nQuestion: {question}",
+        })
+
         with self.client.messages.stream(
             model=self.settings.llm_model,
             max_tokens=self.settings.llm_max_tokens,
             temperature=self.settings.llm_temperature,
             system=SYSTEM_PROMPT,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Context:\n{context}\n\n---\n\nQuestion: {question}",
-                }
-            ],
+            messages=messages,
         ) as stream:
             for text in stream.text_stream:
                 yield ("text", text)

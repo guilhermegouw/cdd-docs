@@ -4,7 +4,7 @@ import chainlit as cl
 
 from cdd_docs.config import get_settings
 from cdd_docs.core.embeddings import Embedder
-from cdd_docs.core.rag import RAGPipeline
+from cdd_docs.core.rag import ChatMessage, RAGPipeline
 from cdd_docs.core.vectorstore import VectorStore
 
 # Global instances (initialized on startup)
@@ -46,6 +46,9 @@ async def on_chat_start():
             settings=settings,
         )
 
+    # Initialize conversation history for this session
+    cl.user_session.set("conversation_history", [])
+
     await cl.Message(
         content=(
             "Welcome to the **CDD Docs Agent**!\n\n"
@@ -71,15 +74,18 @@ async def on_message(message: cl.Message):
 
     question = message.content
 
+    # Get conversation history
+    history: list[ChatMessage] = cl.user_session.get("conversation_history", [])
+
     # Create a message for streaming
     msg = cl.Message(content="")
     await msg.send()
 
-    # Stream the response
+    # Stream the response with history
     full_text = ""
     sources = []
 
-    async for chunk_type, content in rag_pipeline.ask_stream(question):
+    async for chunk_type, content in rag_pipeline.ask_stream(question, history=history):
         if chunk_type == "sources":
             sources = content
         elif chunk_type == "text":
@@ -90,11 +96,23 @@ async def on_message(message: cl.Message):
     if sources:
         source_text = "\n\n---\n\n**Sources:**\n"
         for i, source in enumerate(sources, 1):
-            source_text += f"\n{i}. `{source.file_path}` - {source.section} (score: {source.score:.2f})"
+            score = source.score
+            source_text += f"\n{i}. `{source.file_path}` - {source.section} (score: {score:.2f})"
 
         await msg.stream_token(source_text)
 
     await msg.update()
+
+    # Update conversation history
+    history.append({"role": "user", "content": question})
+    history.append({"role": "assistant", "content": full_text})
+
+    # Trim history if too long
+    max_messages = rag_pipeline.settings.max_history_turns * 2
+    if len(history) > max_messages:
+        history = history[-max_messages:]
+
+    cl.user_session.set("conversation_history", history)
 
 
 @cl.on_stop

@@ -1,9 +1,12 @@
 """Markdown document chunker for RAG indexing."""
 
 import hashlib
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -24,24 +27,27 @@ class Chunk:
 
 
 class MarkdownChunker:
-    """Chunker that splits markdown documents by headers and size."""
+    """Chunker that splits markdown documents by headers.
+
+    Uses pure header-based chunking to keep semantic sections intact,
+    preserving diagrams and explanatory text together.
+    """
 
     def __init__(
         self,
-        chunk_size: int = 500,
-        chunk_overlap: int = 50,
         min_chunk_size: int = 100,
+        max_section_size: int = 1000,
     ):
         """Initialize the chunker.
 
         Args:
-            chunk_size: Target size of each chunk in words.
-            chunk_overlap: Number of words to overlap between chunks.
-            min_chunk_size: Minimum size of a chunk in words.
+            min_chunk_size: Minimum size of a chunk in words. Sections smaller
+                than this will be skipped.
+            max_section_size: Warn if a section exceeds this many words.
+                Consider breaking large sections into subsections.
         """
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
         self.min_chunk_size = min_chunk_size
+        self.max_section_size = max_section_size
 
     def chunk_file(self, file_path: Path, base_path: Path | None = None) -> list[Chunk]:
         """Chunk a markdown file into pieces.
@@ -119,38 +125,30 @@ class MarkdownChunker:
         source_path: str,
         section_title: str,
     ) -> list[Chunk]:
-        """Chunk a single section into appropriately sized pieces."""
-        words = content.split()
+        """Create a single chunk for the entire section.
 
-        if len(words) <= self.chunk_size:
-            # Small enough to be a single chunk
-            if len(words) >= self.min_chunk_size:
-                return [
-                    self._create_chunk(content, source_path, section_title, 0)
-                ]
+        Uses pure header-based chunking - each section becomes one chunk
+        to keep diagrams and explanatory text together.
+        """
+        words = content.split()
+        word_count = len(words)
+
+        # Skip sections that are too small
+        if word_count < self.min_chunk_size:
             return []
 
-        # Split into overlapping chunks
-        chunks = []
-        start = 0
-        chunk_index = 0
+        # Warn if section is unusually large
+        if word_count > self.max_section_size:
+            logger.warning(
+                "Large section detected: '%s' in %s has %d words (max recommended: %d). "
+                "Consider breaking into subsections.",
+                section_title,
+                source_path,
+                word_count,
+                self.max_section_size,
+            )
 
-        while start < len(words):
-            end = min(start + self.chunk_size, len(words))
-            chunk_words = words[start:end]
-            chunk_text = " ".join(chunk_words)
-
-            if len(chunk_words) >= self.min_chunk_size:
-                chunks.append(
-                    self._create_chunk(chunk_text, source_path, section_title, chunk_index)
-                )
-                chunk_index += 1
-
-            start = end - self.chunk_overlap
-            if start >= len(words) - self.min_chunk_size:
-                break
-
-        return chunks
+        return [self._create_chunk(content, source_path, section_title, 0)]
 
     def _create_chunk(
         self,
