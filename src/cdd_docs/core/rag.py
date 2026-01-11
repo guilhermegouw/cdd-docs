@@ -1,5 +1,6 @@
 """RAG pipeline for document Q&A."""
 
+import logging
 from dataclasses import dataclass
 from typing import Literal, TypedDict
 
@@ -8,7 +9,10 @@ import httpx
 
 from cdd_docs.config import Settings
 from cdd_docs.core.embeddings import Embedder
+from cdd_docs.core.mermaid import format_errors_for_llm, validate_all_mermaid
 from cdd_docs.core.vectorstore import VectorStore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,6 +52,18 @@ Guidelines:
 - Reference specific files or sections when relevant
 - Be concise but thorough
 - Use code examples from the docs when helpful
+- When the context contains Mermaid diagrams, include them in your response. You may adapt
+  or simplify diagrams to better answer the question.
+- For architecture or flow questions, include relevant diagrams alongside prose explanations
+
+Mermaid syntax tips (v10.x):
+- Use `graph TD` or `flowchart TD` for flowcharts
+- Node syntax: `A[Rectangle]`, `B(Rounded)`, `C{Diamond}`, `D([Stadium])`
+- Arrows: `-->`, `---`, `-.->`, `==>`
+- Labels: `A -->|label| B` or `A -- label --> B`
+- Subgraphs: `subgraph title ... end`
+- Sequence diagrams: `sequenceDiagram`, participants with `participant A as Label`
+- Avoid special characters in labels - use simple alphanumeric text
 
 If you cannot answer the question from the provided context, respond with:
 "I couldn't find information about that in the documentation. You might want to check
@@ -227,7 +243,63 @@ class RAGPipeline:
                 answer_parts.append(block.text)
         answer_text = "\n".join(answer_parts) if answer_parts else "No response generated."
 
+        # Validate mermaid diagrams and retry if needed
+        answer_text = self._validate_and_fix_mermaid(answer_text, messages)
+
         return Answer(text=answer_text, sources=sources)
+
+    def _validate_and_fix_mermaid(
+        self,
+        answer_text: str,
+        messages: list[dict[str, str]],
+        max_retries: int = 2,
+    ) -> str:
+        """Validate mermaid diagrams and ask LLM to fix if invalid.
+
+        Args:
+            answer_text: The LLM response text to validate.
+            messages: The conversation messages for context.
+            max_retries: Maximum number of fix attempts.
+
+        Returns:
+            The original or corrected answer text.
+        """
+        for attempt in range(max_retries):
+            errors = validate_all_mermaid(answer_text)
+            if not errors:
+                return answer_text
+
+            logger.info(
+                f"Found {len(errors)} mermaid errors, attempting fix (attempt {attempt + 1})"
+            )
+
+            # Build fix request
+            fix_messages = messages.copy()
+            fix_messages.append({"role": "assistant", "content": answer_text})
+            fix_messages.append({"role": "user", "content": format_errors_for_llm(errors)})
+
+            response = self.client.messages.create(
+                model=self.settings.llm_model,
+                max_tokens=self.settings.llm_max_tokens,
+                temperature=self.settings.llm_temperature,
+                system=SYSTEM_PROMPT,
+                messages=fix_messages,
+            )
+
+            answer_parts = []
+            for block in response.content:
+                if hasattr(block, "text") and block.text is not None:
+                    answer_parts.append(block.text)
+            answer_text = "\n".join(answer_parts) if answer_parts else answer_text
+
+        # Log if still errors after retries
+        final_errors = validate_all_mermaid(answer_text)
+        if final_errors:
+            logger.warning(
+                f"Still {len(final_errors)} mermaid errors after {max_retries} fix attempts"
+            )
+
+        return answer_text
 
     async def ask_stream(
         self,
@@ -276,6 +348,7 @@ class RAGPipeline:
             "content": f"Context:\n{context}\n\n---\n\nQuestion: {question}",
         })
 
+        full_text = ""
         with self.client.messages.stream(
             model=self.settings.llm_model,
             max_tokens=self.settings.llm_max_tokens,
@@ -284,4 +357,28 @@ class RAGPipeline:
             messages=messages,
         ) as stream:
             for text in stream.text_stream:
+                full_text += text
                 yield ("text", text)
+
+        # Validate mermaid after streaming completes
+        errors = validate_all_mermaid(full_text)
+        if errors:
+            logger.info(f"Found {len(errors)} mermaid errors in streamed response, fixing...")
+
+            # Signal that we're fixing diagrams
+            yield ("text", "\n\n---\n\n*Fixing diagram syntax...*\n\n")
+
+            # Build fix request
+            fix_messages = messages.copy()
+            fix_messages.append({"role": "assistant", "content": full_text})
+            fix_messages.append({"role": "user", "content": format_errors_for_llm(errors)})
+
+            with self.client.messages.stream(
+                model=self.settings.llm_model,
+                max_tokens=self.settings.llm_max_tokens,
+                temperature=self.settings.llm_temperature,
+                system=SYSTEM_PROMPT,
+                messages=fix_messages,
+            ) as fix_stream:
+                for text in fix_stream.text_stream:
+                    yield ("text", text)

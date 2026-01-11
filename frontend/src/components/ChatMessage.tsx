@@ -18,7 +18,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {isUser ? (
           <p>{message.content}</p>
         ) : (
-          <MarkdownRenderer content={message.content} />
+          <MarkdownRenderer content={message.content} isStreaming={message.isStreaming} />
         )}
       </div>
       {message.sources && message.sources.length > 0 && (
