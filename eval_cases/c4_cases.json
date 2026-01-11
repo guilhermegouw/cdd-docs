@@ -1,0 +1,341 @@
+{
+  "description": "Evaluation cases for C4 Model documentation",
+  "cases": [
+    {
+      "id": "c1-01",
+      "question": "What is CDD and what does it do?",
+      "expected_keywords": ["Context-Driven Development", "AI-powered", "coding assistant", "CLI", "Go"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Tests basic understanding of what CDD is"
+    },
+    {
+      "id": "c1-02",
+      "question": "What LLM providers does CDD support?",
+      "expected_keywords": ["Anthropic", "OpenAI", "Claude", "API Key", "OAuth"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Tests if RAG can find LLM provider info"
+    },
+    {
+      "id": "c1-03",
+      "question": "What external systems does CDD interact with?",
+      "expected_keywords": ["LLM Provider", "File System", "Shell"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Tests understanding of external dependencies"
+    },
+    {
+      "id": "c1-04",
+      "question": "Does CDD have a permission system for tool execution?",
+      "expected_keywords": ["safe", "unsafe", "metadata", "not", "implemented", "approval"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Tests understanding of permission system status"
+    },
+    {
+      "id": "c2-01",
+      "question": "Is CDD a single container or multi-container system?",
+      "expected_keywords": ["single", "container", "Go binary", "in-memory"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests understanding of container architecture"
+    },
+    {
+      "id": "c2-02",
+      "question": "What files does CDD persist to disk?",
+      "expected_keywords": ["cdd.json", "config", "OAuth", "tokens", "debug.log"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests understanding of file persistence"
+    },
+    {
+      "id": "c2-03",
+      "question": "What is NOT persisted in CDD?",
+      "expected_keywords": ["session", "history", "todo", "runtime"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests understanding of what's ephemeral"
+    },
+    {
+      "id": "c2-04",
+      "question": "Where does CDD store configuration files?",
+      "expected_keywords": ["~/.config/cdd", "cdd.json", "custom-providers.json"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests knowledge of config file locations"
+    },
+    {
+      "id": "c2-05",
+      "question": "Can CDD work with project-specific configuration?",
+      "expected_keywords": [".cdd.json", "project", "merge", "global"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests understanding of project config override"
+    },
+    {
+      "id": "c3-01",
+      "question": "What components does the CDD CLI contain?",
+      "expected_keywords": ["TUI", "Agent", "Tools", "Provider", "PubSub", "Config"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests understanding of internal components"
+    },
+    {
+      "id": "c3-02",
+      "question": "What tools are available to the CDD agent?",
+      "expected_keywords": ["read", "write", "edit", "glob", "grep", "bash", "todo_write"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests knowledge of available tools"
+    },
+    {
+      "id": "c3-03",
+      "question": "How does the PubSub system work in CDD?",
+      "expected_keywords": ["broker", "event", "subscribe", "publish", "Agent", "Tool"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests understanding of event system"
+    },
+    {
+      "id": "c3-04",
+      "question": "What is the Bridge component in CDD?",
+      "expected_keywords": ["Bridge", "PubSub", "TUI", "Bubble Tea", "messages"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests understanding of Bridge role"
+    },
+    {
+      "id": "c3-05",
+      "question": "How does OAuth work in CDD?",
+      "expected_keywords": ["OAuth", "PKCE", "token", "refresh", "Anthropic"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests understanding of OAuth flow"
+    },
+    {
+      "id": "c3-06",
+      "question": "What are the 5 event brokers in the PubSub Hub?",
+      "expected_keywords": ["Agent", "Tool", "Session", "Auth", "Todo"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests detailed knowledge of PubSub brokers"
+    },
+    {
+      "id": "c3-07",
+      "question": "Which tools are classified as safe in CDD?",
+      "expected_keywords": ["read", "glob", "grep", "todo_write", "safe"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests knowledge of safe tool classification"
+    },
+    {
+      "id": "c3-08",
+      "question": "Which tools are classified as unsafe in CDD?",
+      "expected_keywords": ["write", "edit", "bash", "unsafe"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests knowledge of unsafe tool classification"
+    },
+    {
+      "id": "c3-09",
+      "question": "What UI framework does CDD use?",
+      "expected_keywords": ["Bubble Tea", "TUI", "terminal", "Go"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Tests knowledge of UI technology"
+    },
+    {
+      "id": "c3-10",
+      "question": "How does CDD handle debug logging?",
+      "expected_keywords": ["debug", "log", "--debug", "flag", "filter"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Tests understanding of debug system"
+    },
+    {
+      "id": "c4-01",
+      "question": "How do I add a new tool to CDD?",
+      "expected_keywords": ["tools", "registry", "Register", "ToolMetadata", "NewAgentTool"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests code-level extension guidance"
+    },
+    {
+      "id": "c4-02",
+      "question": "What CLI commands does CDD support?",
+      "expected_keywords": ["cdd", "version", "status", "providers", "debug"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests knowledge of CLI structure"
+    },
+    {
+      "id": "c4-03",
+      "question": "How is configuration loaded in CDD?",
+      "expected_keywords": ["config", "Load", "global", "project", "merge"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests understanding of config loading"
+    },
+    {
+      "id": "c4-04",
+      "question": "How does the agent loop work in CDD?",
+      "expected_keywords": ["loop", "stream", "tool", "provider", "response"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests understanding of agent execution"
+    },
+    {
+      "id": "c4-05",
+      "question": "What is the Agent interface in CDD?",
+      "expected_keywords": ["Send", "SetSystemPrompt", "SetTools", "History", "Clear"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests knowledge of Agent interface methods"
+    },
+    {
+      "id": "c4-06",
+      "question": "How do I add a new TUI page to CDD?",
+      "expected_keywords": ["page", "Model", "Init", "Update", "View", "tui.go"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests code-level TUI extension guidance"
+    },
+    {
+      "id": "c4-07",
+      "question": "How do I publish events in CDD?",
+      "expected_keywords": ["hub", "Publish", "Agent", "EventProgress"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests event publishing pattern"
+    },
+    {
+      "id": "c4-08",
+      "question": "How do I subscribe to events in CDD?",
+      "expected_keywords": ["Subscribe", "channel", "context", "event"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests event subscription pattern"
+    },
+    {
+      "id": "c4-09",
+      "question": "What provider templates are available in CDD?",
+      "expected_keywords": ["ollama", "lmstudio", "openrouter", "together", "groq"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests knowledge of provider templates"
+    },
+    {
+      "id": "c4-10",
+      "question": "How do I run CDD with debug logging enabled?",
+      "expected_keywords": ["--debug", "debug.log", "tail", "~/.cdd"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests practical debugging knowledge"
+    },
+    {
+      "id": "c4-11",
+      "question": "How does CDD handle OAuth token refresh?",
+      "expected_keywords": ["refresh", "token", "rotation", "persist", "expire"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests OAuth token lifecycle understanding"
+    },
+    {
+      "id": "c4-12",
+      "question": "What is the SessionStore in CDD?",
+      "expected_keywords": ["Session", "messages", "history", "memory", "conversation"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests understanding of session management"
+    },
+    {
+      "id": "c4-13",
+      "question": "How do I add a new config option to CDD?",
+      "expected_keywords": ["Options", "struct", "json", "config.go"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests config extension guidance"
+    },
+    {
+      "id": "c4-14",
+      "question": "What test files exist for the agent in CDD?",
+      "expected_keywords": ["loop_test.go", "test", "agent"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Tests knowledge of test locations"
+    },
+    {
+      "id": "neg-01",
+      "question": "Does CDD support the Socrates phase?",
+      "expected_keywords": ["not", "implemented", "planned", "phase"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Negative test - should say not implemented"
+    },
+    {
+      "id": "neg-02",
+      "question": "Does CDD support multi-agent orchestration?",
+      "expected_keywords": ["not", "single", "agent", "implemented"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Negative test - should say not implemented"
+    },
+    {
+      "id": "neg-03",
+      "question": "Does CDD persist conversation history?",
+      "expected_keywords": ["not", "persisted", "memory", "lost", "exit"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Negative test - should clarify sessions are ephemeral"
+    },
+    {
+      "id": "neg-04",
+      "question": "Does CDD use the small model tier?",
+      "expected_keywords": ["not", "configured", "discarded", "unused"],
+      "expected_sources": ["c1-system-context.md"],
+      "description": "Negative test - should explain small model is unused"
+    },
+    {
+      "id": "neg-05",
+      "question": "Does CDD have a database?",
+      "expected_keywords": ["no", "file", "json", "sqlite", "planned"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Negative test - should say no database yet"
+    },
+    {
+      "id": "cross-01",
+      "question": "What file should I modify to add a new safe tool?",
+      "expected_keywords": ["registry.go", "tools", "Safe", "true", "Register"],
+      "expected_sources": ["c3-component.md", "c4-code.md"],
+      "description": "Cross-doc test - combines C3 tool info with C4 code guidance"
+    },
+    {
+      "id": "cross-02",
+      "question": "How does the TUI receive agent events?",
+      "expected_keywords": ["Bridge", "PubSub", "subscribe", "Bubble Tea"],
+      "expected_sources": ["c3-component.md", "c4-code.md"],
+      "description": "Cross-doc test - event flow understanding"
+    },
+    {
+      "id": "cross-03",
+      "question": "Where is configuration stored and how is it loaded?",
+      "expected_keywords": ["~/.config/cdd", "Load", "merge", "global", "project"],
+      "expected_sources": ["c2-container.md", "c4-code.md"],
+      "description": "Cross-doc test - config storage and loading"
+    },
+    {
+      "id": "prac-01",
+      "question": "How do I connect CDD to a local Ollama instance?",
+      "expected_keywords": ["providers", "add-template", "ollama", "custom"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Practical task - local model setup"
+    },
+    {
+      "id": "prac-02",
+      "question": "How do I check if CDD is configured correctly?",
+      "expected_keywords": ["cdd", "status", "command"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Practical task - verify configuration"
+    },
+    {
+      "id": "prac-03",
+      "question": "How do I debug issues with CDD?",
+      "expected_keywords": ["--debug", "tail", "debug.log", "API", "Auth"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Practical task - troubleshooting"
+    },
+    {
+      "id": "prac-04",
+      "question": "How do I export my custom providers?",
+      "expected_keywords": ["providers", "export", "file"],
+      "expected_sources": ["c4-code.md"],
+      "description": "Practical task - provider management"
+    },
+    {
+      "id": "arch-01",
+      "question": "Why does CDD use a single binary architecture?",
+      "expected_keywords": ["simple", "install", "portable", "dependencies"],
+      "expected_sources": ["c2-container.md"],
+      "description": "Architecture rationale understanding"
+    },
+    {
+      "id": "arch-02",
+      "question": "Why does CDD use PubSub instead of direct calls?",
+      "expected_keywords": ["loose", "coupling", "decouple", "components"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Architecture pattern understanding"
+    },
+    {
+      "id": "arch-03",
+      "question": "Why does CDD need a Bridge component?",
+      "expected_keywords": ["Bubble Tea", "message", "PubSub", "translate", "convert"],
+      "expected_sources": ["c3-component.md"],
+      "description": "Bridge purpose understanding"
+    }
+  ]
+}

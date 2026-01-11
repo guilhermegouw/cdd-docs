@@ -208,5 +208,7 @@ __marimo__/
 
 # CDD Docs Agent
 data/
-.chainlit/
-chainlit.md
+
+# Frontend
+frontend/node_modules/
+static/

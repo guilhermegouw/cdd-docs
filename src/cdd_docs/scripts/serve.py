@@ -1,25 +1,20 @@
-"""Script to serve the Chainlit UI."""
+"""Script to serve the FastAPI chat API."""
 
-import subprocess
-import sys
-from pathlib import Path
+import uvicorn
 
 
 def main():
-    """Run the Chainlit server."""
-    app_path = Path(__file__).parent.parent / "ui" / "app.py"
-
-    if not app_path.exists():
-        print(f"Error: App file not found at {app_path}")
-        sys.exit(1)
-
-    print("Starting CDD Docs Agent UI...")
-    print("Open http://localhost:8000 in your browser")
+    """Run the FastAPI server."""
+    print("Starting CDD Docs Chat API...")
+    print("API: http://localhost:8000/chat")
+    print("Docs: http://localhost:8000/docs")
     print()
 
-    subprocess.run(
-        ["chainlit", "run", str(app_path), "--port", "8000"],
-        check=True,
+    uvicorn.run(
+        "cdd_docs.api.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
     )
 
 
